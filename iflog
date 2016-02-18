@@ -1,0 +1,57 @@
+#!/bin/bash
+#
+# iflog - find lines containing search string in Irssi IRC chatlog 
+
+# Copyright (C) 2015  Digidog - Released under GPL v3
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# @TODO - problem: we cant use * in the terminal command since terminal 
+# already expands it to a path where we are atm, before we arrive at 
+# function, which needs the *. We rather should take another route: 
+# 2 possible solutions:
+# 1) is to use command parameters named like -c=channel -y=year, or 
+# 2) to use another wildcard (*) pseudosymbol (#) which 
+# we can change to * in the function, when we build the path.
+
+DIR="$(dirname "$(readlink -f "$0")")"
+
+shopt -s nullglob
+
+Help(){
+echo " 
+ following arguments are required:
+ [search-item] [year] [channel] [month-day] (e.g.: searchword 2015 bash 01-02)
+ [!] year channel month-day are optional but must stay in order. You can't add a channel without a year.
+
+"
+}
+
+if [[ "$@" ]] ; then
+
+	if [ "$1" == "--help" ] || [ "$1" == "-h" ]  ; then
+		Help
+	else
+		a=("$@"); for i in {0..3} ; do a[i]=${a[i]-*} ; done
+		grep -rEi "${a[0]}" --color $HOME/.irssi/chat_log/${a[1]}/${a[2]}/${a[3]}.log
+  fi
+
+else
+	Help
+exit 0
+fi
+
+shopt -u nullglob
+
+exit 0
