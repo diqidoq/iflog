@@ -25,32 +25,39 @@
 # 2) to use another wildcard (*) pseudosymbol (#) which 
 # we can change to * in the function, when we build the path.
 
-DIR="$(dirname "$(readlink -f "$0")")"
+iflogDIR="$(dirname "$(readlink -f "$0")")"
 
 shopt -s nullglob
 
-Help(){
-echo " 
+function Help(){
+
+cat << EOF
+
  following arguments are required:
  [search-item] [year] [channel] [month-day] (e.g.: searchword 2015 bash 01-02)
  [!] year channel month-day are optional but must stay in order. You can't add a channel without a year.
 
-"
+EOF
 }
 
-if [[ "$@" ]] ; then
-
-	if [ "$1" == "--help" ] || [ "$1" == "-h" ]  ; then
+case "$1" in
+	-h|--help)
 		Help
-	else
+		exit 1
+		;;
+	-s|--search)
+		read -p "search string you want to look for?:" iflogSEARCH
+		read -p "year you want to look in particular? (year[4digits]/none):" iflogYEAR
+		read -p "channel you want to look in particular? (channel/none):" iflogCHAN
+		read -p "month you want to look in particular? (month[2digits]/none):" iflogMONTH
+		read -p "day of month you want to look in particular? (day[2digits]/none):" iflogDAY
+    grep -rEi "$iflogSEARCH" --color $HOME/.irssi/chat_log/$iflogYEAR/$iflogCHAN/$iflogMONTH-$iflogDAY.log
+		;;
+		*)
 		a=("$@"); for i in {0..3} ; do a[i]=${a[i]-*} ; done
 		grep -rEi "${a[0]}" --color $HOME/.irssi/chat_log/${a[1]}/${a[2]}/${a[3]}.log
-  fi
-
-else
-	Help
-exit 0
-fi
+		;;
+esac
 
 shopt -u nullglob
 
